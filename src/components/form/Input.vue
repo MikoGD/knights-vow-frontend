@@ -22,6 +22,7 @@ const props = withDefaults(
     placeholder?: string;
     subLabel?: string;
     type?: string;
+    disabled?: boolean;
   }>(),
   {
     type: 'text',
@@ -41,10 +42,11 @@ const emits = defineEmits<{
     <input
       v-model="model"
       class="field__input"
-      id="username"
+      :id="props.id"
       :class="props.classes?.input"
       :placeholder="props.placeholder"
       :type="props.type"
+      :disabled="props.disabled"
       @blur="emits('blur', $event)"
       @focus="emits('focus', $event)"
     />
