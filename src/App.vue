@@ -1,18 +1,28 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
-import Input, { FieldClasses } from '@components/form/Input.vue';
+import { onBeforeMount, ref } from 'vue';
+import PageLoader from '@components/loader/PageLoader.vue';
 import Authentication from './pages/authentication/sign-up/Authentication.vue';
-const userInputValue = ref('');
-const passwordInputValue = ref('');
+import { useEvents } from '@composables/useEvents';
+import { useAuthenticationStore } from './stores/authentication.store';
 
-const fieldClasses: Record<string, FieldClasses> = {
-  username: {
-    field: 'login__form-username',
-  },
-  password: {
-    field: 'login__form-password',
-  },
-};
+const isAuthChecked = ref<boolean>(false);
+const store = useAuthenticationStore();
+const { subscribe } = useEvents();
+
+onBeforeMount(async () => {
+  subscribe<{ userID: number }>('user-login', (data) => {
+    if (!data?.userID) {
+      throw new Error('No user ID provided in event "user-login"');
+    }
+
+    store.isAuthenticated = true;
+    store.userID = data.userID;
+    isAuthChecked.value = true;
+  });
+
+  await store.getAuthenicationStatus();
+  isAuthChecked.value = true;
+});
 </script>
 
 <template>
@@ -20,8 +30,10 @@ const fieldClasses: Record<string, FieldClasses> = {
     <h1>Knights Vow</h1>
   </nav> -->
   <main>
-    <Authentication />
+    <Authentication v-if="isAuthChecked && !store.isAuthenticated" />
+    <h1 v-if="store.isAuthenticated">Logged in</h1>
   </main>
+  <PageLoader :show="!isAuthChecked" />
 </template>
 
 <style lang="scss" scoped>

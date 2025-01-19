@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
+import { jwtDecode } from 'jwt-decode';
 import Input, { FieldClasses } from '@components/form/Input.vue';
 import { useRequests, addAuthorizationHeader } from '@composables/useRequests';
 import { useEvents } from '@composables/useEvents';
@@ -34,6 +35,11 @@ function updateAuthenticationType(type: 'login' | 'sign-up') {
   authenticationType.value = type;
 }
 
+function getUserIDFromToken(token: string) {
+  const decodedToken = jwtDecode(token) as { client_id: string };
+  return decodedToken.client_id;
+}
+
 async function onFormSubmit(event: Event) {
   event.preventDefault();
   try {
@@ -46,8 +52,10 @@ async function onFormSubmit(event: Event) {
     );
 
     addAuthorizationHeader(responseData.token);
+    const userID = getUserIDFromToken(responseData.token);
+    window.localStorage.setItem('userID', userID);
     resetErrors();
-    publish('user-login');
+    publish('user-login', { userID });
   } catch (err) {
     const error = err as AxiosError<{
       message?: string;
