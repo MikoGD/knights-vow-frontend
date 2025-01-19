@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .vscode
+*storybook.log
+storybook-static
