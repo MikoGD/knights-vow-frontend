@@ -40,9 +40,9 @@ const emits = defineEmits<{
       props.label
     }}</label>
     <input
+      :id="props.id"
       v-model="model"
       class="field__input"
-      :id="props.id"
       :class="props.classes?.input"
       :placeholder="props.placeholder"
       :type="props.type"
