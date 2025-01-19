@@ -21,30 +21,32 @@ const idGenerator = generateId();
 
 function useEvents() {
   /**
-   * 
-   * @param eventName 
-   * @param callback 
-   * @returns 
+   * @param eventName
+   * @param callback
+   * @returns
    */
-  function subscribe<T extends EventData = EventData>(eventName: Event, callback: SubscriberCallback<T>): number {
+  function subscribe<T extends EventData = EventData>(
+    eventName: Event,
+    callback: SubscriberCallback<T>,
+  ): number {
     const ID = idGenerator.next().value;
 
     if (ID === undefined) {
       throw new Error('Could not generate an id');
-    };
+    }
 
     if (!events.has(eventName)) {
       const subscribers = new Map<number, SubscriberCallback<T>>();
 
       subscribers.set(ID, callback);
       events.set(eventName, subscribers as Subscribers<EventData>);
-      return ID
+      return ID;
     }
 
     const subscribers = events.get(eventName);
     subscribers?.set(ID, callback as SubscriberCallback<EventData>);
 
-    return ID
+    return ID;
   }
 
   function unsubscribe(eventName: Event, id: number) {
@@ -72,10 +74,8 @@ function useEvents() {
   return {
     subscribe,
     publish,
-    unsubscribe
+    unsubscribe,
   };
 }
 
-export {
-  useEvents
-}
+export { useEvents };

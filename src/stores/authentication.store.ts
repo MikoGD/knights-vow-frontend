@@ -1,18 +1,16 @@
 import { addAuthorizationHeader, useRequests } from '@/composables/useRequests';
 import { AxiosError } from 'axios';
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 interface AuthenticationState {
   userID: number | null;
-  isAuthenticated: boolean;
 }
 
 export const useAuthenticationStore = defineStore('authentication', {
   state: (): AuthenticationState => {
     return {
       userID: null,
-      isAuthenticated: false
-    }
+    };
   },
   actions: {
     /**
@@ -21,30 +19,29 @@ export const useAuthenticationStore = defineStore('authentication', {
      * @returns Authentication status
      */
     async getAuthenicationStatus(): Promise<boolean> {
-      const { get } = useRequests()
-      const userID = this.userID ?? window.localStorage.getItem('userID')
-      const token = window.localStorage.getItem('token')
+      const { get } = useRequests();
+      const userID = this.userID ?? window.localStorage.getItem('userID');
+      const token = window.localStorage.getItem('token');
 
       if (!userID && !token) {
-        return false
+        return false;
       }
 
-      addAuthorizationHeader(token as string)
+      addAuthorizationHeader(token as string);
 
-      let response: { isAuthenticated: boolean }
+      let response: { isAuthenticated: boolean };
 
       try {
-        response = await get<{ isAuthenticated: boolean }>(`/users/${userID}/auth-status`)
+        response = await get<{ isAuthenticated: boolean }>(`/users/${userID}/auth-status`);
       } catch (error) {
-        error = error as AxiosError
+        error = error as AxiosError;
         // TODO: Handle error
-        console.error(error)
-        return false
+        console.error(error);
+        return false;
       } finally {
       }
 
-      this.isAuthenticated = response.isAuthenticated
-      return response.isAuthenticated
-    }
-  }
-})
+      return response.isAuthenticated;
+    },
+  },
+});

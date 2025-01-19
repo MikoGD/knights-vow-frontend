@@ -49,13 +49,10 @@ async function onFormSubmit(event: Event) {
   isLoading.value = true;
 
   try {
-    const responseData = await post<{ token: string }>(
-      `/users/${authenticationType.value}`,
-      {
-        username: userInputValue.value,
-        password: passwordInputValue.value,
-      },
-    );
+    const responseData = await post<{ token: string }>(`/users/${authenticationType.value}`, {
+      username: userInputValue.value,
+      password: passwordInputValue.value,
+    });
 
     addAuthorizationHeader(responseData.token);
     const userID = getUserIDFromToken(responseData.token);
@@ -68,8 +65,7 @@ async function onFormSubmit(event: Event) {
       error: Record<string | 'username', string | number>;
     }>;
     if (error.response?.data?.error?.username) {
-      fieldClasses.username.errorMessage = error.response.data.error
-        .username as string;
+      fieldClasses.username.errorMessage = error.response.data.error.username as string;
       return;
     }
     errorMessage.value = error?.response?.data.message || 'An error occurred';
@@ -109,11 +105,7 @@ const authenticaitonLabel = computed<string>(() => {
         :classes="fieldClasses.password"
         :disabled="isLoading"
       />
-      <Button
-        class="authentication__form-submit-btn"
-        type="submit"
-        :is-loading="isLoading"
-      >
+      <Button class="authentication__form-submit-btn" type="submit" :is-loading="isLoading">
         {{ authenticaitonLabel }}
       </Button>
       <div
@@ -123,10 +115,7 @@ const authenticaitonLabel = computed<string>(() => {
       >
         <u>Sign up</u>
       </div>
-      <div
-        v-if="authenticationType === 'login'"
-        class="authentication__forgot-password"
-      >
+      <div v-if="authenticationType === 'login'" class="authentication__forgot-password">
         <u>Forgot password?</u>
       </div>
     </form>
