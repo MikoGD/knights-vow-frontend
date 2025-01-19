@@ -1,14 +1,17 @@
 <script lang="ts" setup>
+import { AxiosError } from 'axios';
 import { ref, computed } from 'vue';
 import { jwtDecode } from 'jwt-decode';
 import Input, { FieldClasses } from '@components/form/Input.vue';
+import Button from '@components/Button.vue';
 import { useRequests, addAuthorizationHeader } from '@composables/useRequests';
 import { useEvents } from '@composables/useEvents';
-import { AxiosError } from 'axios';
+
 const userInputValue = ref('');
 const passwordInputValue = ref('');
 const errorMessage = ref<string | undefined>();
 const authenticationType = ref<'login' | 'sign-up'>('login');
+const isLoading = ref(false);
 
 const { post } = useRequests();
 const { publish } = useEvents();
@@ -42,6 +45,9 @@ function getUserIDFromToken(token: string) {
 
 async function onFormSubmit(event: Event) {
   event.preventDefault();
+
+  isLoading.value = true;
+
   try {
     const responseData = await post<{ token: string }>(
       `/users/${authenticationType.value}`,
@@ -68,6 +74,7 @@ async function onFormSubmit(event: Event) {
     }
     errorMessage.value = error?.response?.data.message || 'An error occurred';
   } finally {
+    isLoading.value = false;
     return;
   }
 }
@@ -91,6 +98,7 @@ const authenticaitonLabel = computed<string>(() => {
         placeholder="Enter username"
         type="text"
         :classes="fieldClasses.username"
+        :disabled="isLoading"
       />
       <Input
         v-model="passwordInputValue"
@@ -99,10 +107,15 @@ const authenticaitonLabel = computed<string>(() => {
         placeholder="Enter password"
         type="password"
         :classes="fieldClasses.password"
+        :disabled="isLoading"
       />
-      <button class="authentication__form-submit-btn" type="submit">
+      <Button
+        class="authentication__form-submit-btn"
+        type="submit"
+        :is-loading="isLoading"
+      >
         {{ authenticaitonLabel }}
-      </button>
+      </Button>
       <div
         v-if="authenticationType === 'login'"
         class="authentication__sign-up"
@@ -126,6 +139,7 @@ const authenticaitonLabel = computed<string>(() => {
 .authentication {
   @include utils.column;
   align-items: start;
+  margin-top: 2.5rem;
 
   width: 100%;
   height: 100%;
