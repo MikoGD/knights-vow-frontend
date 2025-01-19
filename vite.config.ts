@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,20 +8,8 @@ export default defineConfig({
     alias: [
       {
         find: '@',
-        replacement: '/src'
+        replacement: '/src',
       },
-      {
-        find: '@styles',
-        replacement: '/src/styles'
-      },
-      {
-        find: '@components',
-        replacement: '/src/components'
-      },
-      {
-        find: '@composables',
-        replacement: '/src/composables',
-      }
-    ]
-  }
-})
+    ],
+  },
+});

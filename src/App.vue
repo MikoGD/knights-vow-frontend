@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onBeforeMount, ref } from 'vue';
-import { useEvents } from '@composables/useEvents';
+import { useEvents } from '@/composables/useEvents';
 import { useAuthenticationStore } from './stores/authentication.store';
 import { RouterView, useRouter } from 'vue-router';
 
@@ -29,8 +29,8 @@ onBeforeMount(async () => {
 </template>
 
 <style lang="scss" scoped>
-@use '@styles/utils';
-@use '@styles/variables/colors';
+@use '@/styles/utils';
+@use '@/styles/variables/colors';
 
 // nav {
 //   padding: 0.75rem 0.75rem;

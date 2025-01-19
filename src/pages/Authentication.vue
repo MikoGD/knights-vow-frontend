@@ -2,10 +2,10 @@
 import { AxiosError } from 'axios';
 import { ref, computed } from 'vue';
 import { jwtDecode } from 'jwt-decode';
-import Input, { FieldClasses } from '@components/form/Input.vue';
-import Button from '@components/Button.vue';
-import { useRequests, addAuthorizationHeader } from '@composables/useRequests';
-import { useEvents } from '@composables/useEvents';
+import Input, { FieldClasses } from '@/components/form/Input.vue';
+import Button from '@/components/Button.vue';
+import { useRequests, addAuthorizationHeader } from '@/composables/useRequests';
+import { useEvents } from '@/composables/useEvents';
 
 const userInputValue = ref('');
 const passwordInputValue = ref('');
@@ -71,7 +71,6 @@ async function onFormSubmit(event: Event) {
     errorMessage.value = error?.response?.data.message || 'An error occurred';
   } finally {
     isLoading.value = false;
-    return;
   }
 }
 
@@ -88,8 +87,8 @@ const authenticaitonLabel = computed<string>(() => {
     </h3>
     <form class="authentication__form" @submit="onFormSubmit">
       <Input
-        v-model="userInputValue"
         id="username"
+        v-model="userInputValue"
         label="Username"
         placeholder="Enter username"
         type="text"
@@ -97,8 +96,8 @@ const authenticaitonLabel = computed<string>(() => {
         :disabled="isLoading"
       />
       <Input
-        v-model="passwordInputValue"
         id="password"
+        v-model="passwordInputValue"
         label="Password"
         placeholder="Enter password"
         type="password"
@@ -122,8 +121,8 @@ const authenticaitonLabel = computed<string>(() => {
   </section>
 </template>
 <style lang="scss" scoped>
-@use '@styles/utils';
-@use '@styles/variables/colors';
+@use '@/styles/utils';
+@use '@/styles/variables/colors';
 
 .authentication {
   @include utils.column;

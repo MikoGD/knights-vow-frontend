@@ -25,7 +25,7 @@ const props = withDefaults(
 </template>
 
 <style lang="scss" scoped>
-@use '@styles/variables/colors';
+@use '@/styles/variables/colors';
 
 .button {
   width: 8rem;

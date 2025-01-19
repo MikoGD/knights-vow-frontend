@@ -63,8 +63,8 @@ const emits = defineEmits<{
   </div>
 </template>
 <style lang="scss" scoped>
-@use '@styles/utils';
-@use '@styles/variables/colors';
+@use '@/styles/utils';
+@use '@/styles/variables/colors';
 
 .field {
   @include utils.column;
