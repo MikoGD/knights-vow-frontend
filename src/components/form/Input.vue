@@ -57,11 +57,7 @@ const emits = defineEmits<{
     >
       Sub-label
     </span>
-    <span
-      v-if="props.subLabel"
-      class="field__sub-label"
-      :class="props.classes?.subLabel"
-    >
+    <span v-if="props.subLabel" class="field__sub-label" :class="props.classes?.subLabel">
       Sub-label
     </span>
   </div>

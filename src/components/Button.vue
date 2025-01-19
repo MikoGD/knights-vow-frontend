@@ -13,11 +13,7 @@ const props = withDefaults(
 );
 </script>
 <template>
-  <button
-    class="button"
-    type="submit"
-    :disabled="props.disabled || props.isLoading"
-  >
+  <button class="button" type="submit" :disabled="props.disabled || props.isLoading">
     <Icon
       v-if="props.isLoading"
       class="button__loader"
