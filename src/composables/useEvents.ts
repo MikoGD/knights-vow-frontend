@@ -1,9 +1,14 @@
+/**
+ * Events that can be subscribed to:
+ * user-login - when a user logs in
+ * user-logout - when a user logs out
+ */
 type Event = 'user-login' | 'user-logout';
 type EventData = Record<string, unknown>;
-type SubscriberCallback = (event: Event, data?: EventData) => Promise<void> | void;
-type Subscribers = Map<number, SubscriberCallback>;
+type SubscriberCallback<T extends EventData> = (data?: T) => Promise<void> | void;
+type Subscribers<T extends EventData> = Map<number, SubscriberCallback<T>>;
 
-const events: Map<Event, Subscribers> = new Map();
+const events: Map<Event, Subscribers<EventData>> = new Map();
 
 function* generateId() {
   let id = 0;
@@ -21,7 +26,7 @@ function useEvents() {
    * @param callback 
    * @returns 
    */
-  function subscribe(eventName: Event, callback: SubscriberCallback): number {
+  function subscribe<T extends EventData = EventData>(eventName: Event, callback: SubscriberCallback<T>): number {
     const ID = idGenerator.next().value;
 
     if (ID === undefined) {
@@ -29,15 +34,15 @@ function useEvents() {
     };
 
     if (!events.has(eventName)) {
-      const subscribers = new Map<number, SubscriberCallback>();
+      const subscribers = new Map<number, SubscriberCallback<T>>();
 
       subscribers.set(ID, callback);
-      events.set(eventName, subscribers);
+      events.set(eventName, subscribers as Subscribers<EventData>);
       return ID
     }
 
     const subscribers = events.get(eventName);
-    subscribers?.set(ID, callback);
+    subscribers?.set(ID, callback as SubscriberCallback<EventData>);
 
     return ID
   }
@@ -58,7 +63,7 @@ function useEvents() {
     const subscriberPromises: (Promise<void> | void)[] = [];
 
     for (const subscriber of subscribers.values()) {
-      subscriberPromises.push(subscriber(eventName, data));
+      subscriberPromises.push(subscriber(data));
     }
 
     await Promise.all(subscriberPromises);
