@@ -1,45 +1,45 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import typescriptEslint from 'typescript-eslint';
+import eslintPluginVue from 'eslint-plugin-vue';
+import jsDocPlugin from 'eslint-plugin-jsdoc';
+import storybookPlugin from 'eslint-plugin-storybook';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+import globals from 'globals';
 
 export default [
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:vue/vue3-recommended',
-    '@vue/eslint-config-prettier/skip-formatting',
-    'prettier',
-    'plugin:storybook/recommended',
-    'plugin:storybook/recommended',
-  ),
   {
-    plugins: {
-      '@typescript-eslint': typescriptEslint,
-    },
+    ignores: ['node_modules', 'dist', 'storybook-static', 'coverage'],
+  },
+  js.configs.recommended,
+  typescriptEslint.configs.recommended,
+  ...eslintPluginVue.configs['flat/essential'],
+  {
+    files: ['**/*.{ts,vue]', '**/*.spec.{ts,js}', '**/*.stories.{ts,js}'],
     languageOptions: {
       ecmaVersion: 5,
       sourceType: 'module',
       parserOptions: {
-        parser: '@typescript-eslint/parser',
+        parser: typescriptEslint.parser,
         project: './tsconfig.app.json',
-        extraFileExtensions: ['.vue'],
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2020,
       },
     },
+  },
+  jsDocPlugin.configs['flat/recommended'],
+  {
+    files: ['**/*.{ts,vue}', '**/*.test.vue', '**/*.spec.{ts,js}', '**/*.stories.{ts,js}'],
     rules: {
+      'jsdoc/no-undefined-types': 'error',
+      'jsdoc/require-property-description': 'off',
+      'jsdoc/require-param-type': 'off',
+      'jsdoc/require-returns-type': 'off',
       'vue/multi-word-component-names': 'off',
       'vue/require-default-prop': 'off',
     },
   },
-  {
-    ignores: ['node_modules', 'dist', 'storybook-static'],
-  },
+  ...storybookPlugin.configs['flat/recommended'],
+  eslintConfigPrettier,
 ];

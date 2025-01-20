@@ -23,6 +23,14 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "./.storybook/*.ts", "./eslint.config.mjs"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/**/*.d.ts",
+    "src/**/*.stories.ts",
+    "./.storybook/*.ts",
+    "./eslint.config.mjs",
+    "vite.config.ts"
+  ],
   "exclude": ["node_modules", "./storybook-static"]
 }
