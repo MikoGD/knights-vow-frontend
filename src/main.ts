@@ -23,10 +23,15 @@ const router = createRouter({
 
 router.beforeEach(async (to, _, next) => {
   const store = useAuthenticationStore();
+  console.log('getting auth status');
   const isAuthenticated = await store.getAuthenicationStatus();
 
   if (!isAuthenticated && to.path !== '/login') {
     return next('/login');
+  }
+
+  if (isAuthenticated && to.path === '/login') {
+    return next('/');
   }
 
   next();
