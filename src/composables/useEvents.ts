@@ -10,6 +10,10 @@ type Subscribers<T extends EventData> = Map<number, SubscriberCallback<T>>;
 
 const events: Map<Event, Subscribers<EventData>> = new Map();
 
+/**
+ * Generates a unique ID for each subscriber
+ * @yields a unique ID
+ */
 function* generateId() {
   let id = 0;
   while (true) {
@@ -19,11 +23,15 @@ function* generateId() {
 
 const idGenerator = generateId();
 
+/**
+ * Composable to handle subscribing/unsubscribing to and publishing events
+ * @returns Functions to subscribe, unsubscribe, and publish events
+ */
 function useEvents() {
   /**
-   * @param eventName
-   * @param callback
-   * @returns
+   * @param eventName Name of the event to subscribe to
+   * @param callback Function to call when the event is published
+   * @returns ID of the subscriber
    */
   function subscribe<T extends EventData = EventData>(
     eventName: Event,
@@ -49,6 +57,11 @@ function useEvents() {
     return ID;
   }
 
+  /**
+   * Unsubscribes a subscriber from an event
+   * @param eventName Event to unsubscribe from
+   * @param id ID of the subscriber to remove
+   */
   function unsubscribe(eventName: Event, id: number) {
     const subscribers = events.get(eventName);
 
@@ -57,6 +70,11 @@ function useEvents() {
     subscribers.delete(id);
   }
 
+  /**
+   * Publishes an event to all subscribers
+   * @param eventName Name of event
+   * @param data Payload to send to subscribers
+   */
   async function publish(eventName: Event, data?: EventData) {
     const subscribers = events.get(eventName);
 

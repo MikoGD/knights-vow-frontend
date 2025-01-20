@@ -34,11 +34,9 @@ export const useAuthenticationStore = defineStore('authentication', {
       try {
         response = await get<{ isAuthenticated: boolean }>(`/users/${userID}/auth-status`);
       } catch (error) {
-        error = error as AxiosError;
         // TODO: Handle error
-        console.error(error);
+        console.error(error as AxiosError);
         return false;
-      } finally {
       }
 
       return response.isAuthenticated;

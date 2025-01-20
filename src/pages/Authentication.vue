@@ -27,22 +27,38 @@ const fieldClasses: Record<string, FieldClasses> = {
   },
 };
 
+/**
+ * Reset all error messages
+ */
 function resetErrors() {
   fieldClasses.username.errorMessage = '';
   fieldClasses.password.errorMessage = '';
   errorMessage.value = '';
 }
 
+/**
+ * Updates the authentication type to either login or sign-up
+ * @param type - The type of authentication to update to
+ */
 function updateAuthenticationType(type: 'login' | 'sign-up') {
   resetErrors();
   authenticationType.value = type;
 }
 
+/**
+ * Gets the user ID from the token from the claim "client_id"
+ * @param token - The token to decode
+ * @returns The user ID
+ */
 function getUserIDFromToken(token: string) {
   const decodedToken = jwtDecode(token) as { client_id: string };
   return decodedToken.client_id;
 }
 
+/**
+ * Handles the form submit event
+ * @param event - The form submit event
+ */
 async function onFormSubmit(event: Event) {
   event.preventDefault();
 
@@ -58,6 +74,7 @@ async function onFormSubmit(event: Event) {
     const userID = getUserIDFromToken(responseData.token);
     window.localStorage.setItem('userID', userID);
     resetErrors();
+    console.log('publishing user-login event');
     publish('user-login', { userID });
   } catch (err) {
     const error = err as AxiosError<{
