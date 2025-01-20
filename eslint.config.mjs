@@ -6,21 +6,24 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import js from '@eslint/js';
 import globals from 'globals';
 
-export default [
+export default typescriptEslint.config(
   {
     ignores: ['node_modules', 'dist', 'storybook-static', 'coverage'],
   },
-  js.configs.recommended,
-  typescriptEslint.configs.recommended,
-  ...eslintPluginVue.configs['flat/essential'],
   {
-    files: ['**/*.{ts,vue]', '**/*.spec.{ts,js}', '**/*.stories.{ts,js}'],
+    files: ['**/*.{ts,vue}', '**/*.spec.{ts,js}', '**/*.stories.{ts,js}'],
+    extends: [
+      js.configs.recommended,
+      ...typescriptEslint.configs.recommended,
+      ...eslintPluginVue.configs['flat/recommended'],
+    ],
     languageOptions: {
       ecmaVersion: 5,
       sourceType: 'module',
       parserOptions: {
         parser: typescriptEslint.parser,
         project: './tsconfig.app.json',
+        extraFileExtensions: ['.vue'],
       },
       globals: {
         ...globals.browser,
@@ -28,6 +31,7 @@ export default [
       },
     },
   },
+  ...storybookPlugin.configs['flat/recommended'],
   jsDocPlugin.configs['flat/recommended'],
   {
     files: ['**/*.{ts,vue}', '**/*.test.vue', '**/*.spec.{ts,js}', '**/*.stories.{ts,js}'],
@@ -40,6 +44,5 @@ export default [
       'vue/require-default-prop': 'off',
     },
   },
-  ...storybookPlugin.configs['flat/recommended'],
   eslintConfigPrettier,
-];
+);
