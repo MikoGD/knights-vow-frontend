@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import Button from '@/components/Button.vue';
+import SearchInput from '@/components/SearchInput.vue';
 import { useRequests } from '@/composables';
 import { Icon } from '@iconify/vue';
 import { formatDistanceToNow } from 'date-fns';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 
 interface FileRecord {
   id: string;
@@ -20,6 +21,8 @@ interface GetUploadsResponse {
 
 const { get, uploadFile: uploadFileSocket, downloadFile: downloadFileSocket } = useRequests();
 const fileToUpload = ref<File | null>(null);
+const inputFileRef = useTemplateRef<HTMLInputElement>('input-file-ref');
+const searchModel = ref('');
 
 // const isLoading = ref(false);
 const files = ref<FileRecord[]>([]);
@@ -41,7 +44,8 @@ async function handleFileAdded(event: Event) {
   const files = target.files;
 
   if (files && files.length > 0) {
-    fileToUpload.value = files[0];
+    await uploadFileSocket(files[0]);
+    fileToUpload.value = null;
   }
 }
 
@@ -49,10 +53,7 @@ async function handleFileAdded(event: Event) {
  *
  */
 async function handleUploadFile() {
-  if (fileToUpload.value) {
-    await uploadFileSocket(fileToUpload.value);
-    fileToUpload.value = null;
-  }
+  inputFileRef.value?.click();
 }
 
 onMounted(async () => {
@@ -62,20 +63,39 @@ onMounted(async () => {
 </script>
 <template>
   <section class="home">
+    <div class="header">
+      <input
+        ref="input-file-ref"
+        type="file"
+        class="header__upload-input"
+        @change="handleFileAdded"
+      />
+      <SearchInput
+        id="files-search-input"
+        v-model="searchModel"
+        class="header__search-input"
+        placeholder="Search..."
+      />
+      <Button
+        class="header__upload-btn"
+        type="icon"
+        icon="material-symbols:upload-2-rounded"
+        @click="handleUploadFile"
+        >Upload</Button
+      >
+    </div>
     <div class="file-list">
       <div class="file-list__headers">
         <div class="file-list__headers-cell file-name-header">Files</div>
-        <div class="file-list__headers-cell created-date-header">Created date</div>
         <div class="file-list__headers-cell actions-header">&nbsp;</div>
       </div>
       <div class="file-list__body">
         <div v-for="file of files" :key="file.id" class="file-list__row">
           <div class="file-list__row-cell file-name-cell">
             <span class="file-name-cell__file">{{ file.name }}</span>
-            <span class="file-name-cell__owner">{{ file.ownerUsername }}</span>
-          </div>
-          <div class="file-list__row-cell created-date-cell">
-            {{ formatDistanceToNow(file.createdDate) }}
+            <span class="file-name-cell__owner"
+              >{{ file.ownerUsername }} - {{ formatDistanceToNow(file.createdDate) }} ago</span
+            >
           </div>
           <div class="file-list__row-cell actions-cell">
             <Icon
@@ -87,8 +107,6 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <input type="file" class="home__upload-input" @change="handleFileAdded" />
-    <Button class="home__upload-btn" @click="handleUploadFile">Upload</Button>
   </section>
 </template>
 <style lang="scss" scoped>
@@ -97,6 +115,31 @@ onMounted(async () => {
 .home {
   height: 100%;
   width: 100%;
+}
+
+.header {
+  position: sticky;
+  display: flex;
+  top: 0;
+  justify-content: end;
+  align-items: center;
+  padding: 1rem 0;
+  width: 100%;
+  background-color: colors.$white;
+
+  &__upload-input {
+    display: none;
+  }
+
+  ::v-deep &__search-input {
+    padding-right: 3rem !important;
+    border-radius: 2rem !important;
+  }
+
+  ::v-deep &__upload-btn {
+    position: absolute;
+    right: 1rem;
+  }
 }
 
 .file-list {
@@ -115,11 +158,7 @@ onMounted(async () => {
       font-weight: 300;
 
       &.file-name-header {
-        flex-basis: 45%;
-      }
-
-      &.created-date-header {
-        flex-basis: 40%;
+        flex-basis: 85%;
       }
 
       &.actions-header {
@@ -150,7 +189,15 @@ onMounted(async () => {
       &.file-name-cell {
         display: flex;
         flex-direction: column;
-        flex-basis: 45%;
+        flex-basis: 85%;
+
+        & span.file-name-cell__file {
+          display: inline-block;
+          max-width: 16rem; // or desired width
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
 
         & span.file-name-cell__owner {
           font-size: 0.9rem;
@@ -159,16 +206,12 @@ onMounted(async () => {
         }
       }
 
-      &.created-date-cell {
-        flex-basis: 40%;
-      }
-
       &.actions-cell {
         flex-basis: 15%;
         text-align: right;
         display: flex;
         justify-content: space-between;
-        align-items: start;
+        align-items: center;
         padding-top: 0.2rem;
       }
     }
