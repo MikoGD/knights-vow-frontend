@@ -1,10 +1,11 @@
 <script lang="ts" setup>
+import Button from '@/components/Button.vue';
 import { useRequests } from '@/composables';
 import { Icon } from '@iconify/vue';
 import { formatDistanceToNow } from 'date-fns';
 import { onMounted, ref } from 'vue';
 
-interface File {
+interface FileRecord {
   id: string;
   name: string;
   createdDate: string;
@@ -14,15 +15,48 @@ interface File {
 
 interface GetUploadsResponse {
   count: number;
-  files: File[];
+  files: FileRecord[];
 }
 
+const { get, uploadFile: uploadFileSocket, downloadFile: downloadFileSocket } = useRequests();
+const fileToUpload = ref<File | null>(null);
+
 // const isLoading = ref(false);
-const files = ref<File[]>([]);
+const files = ref<FileRecord[]>([]);
+
+/**
+ *
+ * @param file
+ */
+async function handleDownloadFile(file: FileRecord) {
+  await downloadFileSocket(Number(file.id));
+}
+
+/**
+ *
+ * @param event
+ */
+async function handleFileAdded(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const files = target.files;
+
+  if (files && files.length > 0) {
+    fileToUpload.value = files[0];
+  }
+}
+
+/**
+ *
+ */
+async function handleUploadFile() {
+  if (fileToUpload.value) {
+    await uploadFileSocket(fileToUpload.value);
+    fileToUpload.value = null;
+  }
+}
 
 onMounted(async () => {
-  const { get } = useRequests();
-  const responseData = await get<GetUploadsResponse>('/uploads');
+  const responseData = await get<GetUploadsResponse>('/files');
   files.value = responseData.files;
 });
 </script>
@@ -44,12 +78,17 @@ onMounted(async () => {
             {{ formatDistanceToNow(file.createdDate) }}
           </div>
           <div class="file-list__row-cell actions-cell">
-            <Icon icon="material-symbols:download-2-rounded" />
+            <Icon
+              icon="material-symbols:download-2-rounded"
+              @click="() => handleDownloadFile(file)"
+            />
             <Icon icon="material-symbols:delete-outline-rounded" />
           </div>
         </div>
       </div>
     </div>
+    <input type="file" class="home__upload-input" @change="handleFileAdded" />
+    <Button class="home__upload-btn" @click="handleUploadFile">Upload</Button>
   </section>
 </template>
 <style lang="scss" scoped>
