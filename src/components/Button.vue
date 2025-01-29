@@ -4,23 +4,41 @@ const props = withDefaults(
   defineProps<{
     isLoading?: boolean;
     disabled?: boolean;
-    type?: 'submit' | 'button';
+    type?: 'submit' | 'button' | 'icon';
+    icon?: string;
+    class?: string;
   }>(),
   {
     isLoading: false,
     type: 'submit',
   },
 );
+
+const emits = defineEmits<{
+  click: [MouseEvent];
+}>();
 </script>
 <template>
-  <button class="button" type="submit" :disabled="props.disabled || props.isLoading">
-    <Icon
-      v-if="props.isLoading"
-      class="button__loader"
-      icon="svg-spinners:3-dots-bounce"
-      :type="props.type"
-    />
+  <button
+    v-if="props.type !== 'icon'"
+    class="button"
+    :class="props.class"
+    :type="props.type"
+    :disabled="props.disabled || props.isLoading"
+    @click="emits('click', $event)"
+  >
+    <Icon v-if="props.isLoading" class="button__loader" icon="svg-spinners:3-dots-bounce" />
     <slot v-else />
+  </button>
+  <button
+    v-if="props.type === 'icon' && props.icon"
+    class="button button--icon"
+    type="button"
+    :class="props.class"
+    :disabled="props.disabled || props.isLoading"
+    @click="emits('click', $event)"
+  >
+    <Icon class="button__loader" :icon="props.icon" />
   </button>
 </template>
 
@@ -36,7 +54,6 @@ const props = withDefaults(
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.3125rem;
-  margin-bottom: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -47,6 +64,13 @@ const props = withDefaults(
 
   &__loader {
     font-size: 2rem;
+  }
+
+  &--icon {
+    background: transparent;
+    width: fit-content;
+    height: fit-content;
+    padding: 0;
   }
 }
 </style>
