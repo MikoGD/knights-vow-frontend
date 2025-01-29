@@ -4,12 +4,14 @@ import { defineStore } from 'pinia';
 
 interface AuthenticationState {
   userID: number | null;
+  token: string | null;
 }
 
 export const useAuthenticationStore = defineStore('authentication', {
   state: (): AuthenticationState => {
     return {
       userID: null,
+      token: null,
     };
   },
   actions: {
@@ -33,6 +35,10 @@ export const useAuthenticationStore = defineStore('authentication', {
 
       try {
         response = await get<{ isAuthenticated: boolean }>(`/users/${userID}/auth-status`);
+        if (response.isAuthenticated) {
+          this.userID = Number(userID);
+          this.token = token;
+        }
       } catch (error) {
         // TODO: Handle error
         console.error(error as AxiosError);

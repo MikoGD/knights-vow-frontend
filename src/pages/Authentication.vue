@@ -6,6 +6,9 @@ import Input, { FieldClasses } from '@/components/form/Input.vue';
 import Button from '@/components/Button.vue';
 import { useRequests, addAuthorizationHeader } from '@/composables/useRequests';
 import { useEvents } from '@/composables/useEvents';
+import { useAuthenticationStore } from '@/stores/authentication.store';
+
+const store = useAuthenticationStore();
 
 const userInputValue = ref('');
 const passwordInputValue = ref('');
@@ -72,6 +75,8 @@ async function onFormSubmit(event: Event) {
 
     addAuthorizationHeader(responseData.token);
     const userID = getUserIDFromToken(responseData.token);
+    store.userID = Number(userID);
+    store.token = responseData.token;
     window.localStorage.setItem('userID', userID);
     resetErrors();
     console.log('publishing user-login event');
@@ -85,7 +90,7 @@ async function onFormSubmit(event: Event) {
       fieldClasses.username.errorMessage = error.response.data.error.username as string;
       return;
     }
-    errorMessage.value = error?.response?.data.message || 'An error occurred';
+    errorMessage.value = error?.response?.data.message || `An error occurred ${error}`;
   } finally {
     isLoading.value = false;
   }
