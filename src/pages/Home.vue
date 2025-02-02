@@ -28,16 +28,16 @@ const searchModel = ref('');
 const files = ref<FileRecord[]>([]);
 
 /**
- *
- * @param file
+ * Handles downloading a file
+ * @param file File to download
  */
 async function handleDownloadFile(file: FileRecord) {
   await downloadFileSocket(Number(file.id));
 }
 
 /**
- *
- * @param event
+ * Handles event where file is added to input. File will be sent through web socket
+ * @param event Event emitted
  */
 async function handleFileAdded(event: Event) {
   const target = event.target as HTMLInputElement;
@@ -50,10 +50,25 @@ async function handleFileAdded(event: Event) {
 }
 
 /**
- *
+ * Handles opening the file explorer to add a file to input
  */
-async function handleUploadFile() {
+function handleUploadFile() {
   inputFileRef.value?.click();
+}
+
+/**
+ * Handles searching for files with name entered. Sends a request to the server.
+ */
+async function handleSearchInput() {
+  let responseData: GetUploadsResponse;
+
+  if (searchModel.value === '') {
+    responseData = await get<GetUploadsResponse>('/files');
+  } else {
+    responseData = await get<GetUploadsResponse>(`/files?fileName=${searchModel.value}`);
+  }
+
+  files.value = responseData.files;
 }
 
 onMounted(async () => {
@@ -75,6 +90,8 @@ onMounted(async () => {
         v-model="searchModel"
         class="header__search-input"
         placeholder="Search..."
+        :debounce="500"
+        @input="handleSearchInput"
       />
       <Button
         class="header__upload-btn"
