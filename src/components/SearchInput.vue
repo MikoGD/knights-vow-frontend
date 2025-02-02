@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { debounceFunction } from '@/utils/debounce';
+
 export interface FieldClasses {
   field?: string;
 }
@@ -8,12 +10,35 @@ const props = defineProps<{
   class?: string;
   placeholder?: string;
   disabled?: boolean;
+  debounce?: number;
 }>();
 const model = defineModel<string>({ required: true });
 const emits = defineEmits<{
   focus: [FocusEvent];
   blur: [FocusEvent];
+  input: [Event];
 }>();
+
+let inputDebounce: (...args: unknown[]) => void;
+
+/**
+ * Handle onChange event
+ * @param event Event emitted
+ */
+function handleOnInput(event: Event) {
+  if (!props.debounce) {
+    emits('input', event);
+  }
+
+  if (!inputDebounce) {
+    inputDebounce = debounceFunction(
+      (...args: unknown[]) => emits('input', ...(args as [Event])),
+      props.debounce,
+    );
+  }
+
+  inputDebounce(event);
+}
 </script>
 <template>
   <input
@@ -26,6 +51,7 @@ const emits = defineEmits<{
     :disabled="props.disabled"
     @blur="emits('blur', $event)"
     @focus="emits('focus', $event)"
+    @input="handleOnInput"
   />
 </template>
 <style lang="scss" scoped>
