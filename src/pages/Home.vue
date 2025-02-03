@@ -28,8 +28,6 @@ const searchModel = ref('');
 const isLoading = ref(true);
 const selectedFile = ref<FileRecord | null>(null);
 const showActionsPanel = ref(false);
-
-// const isLoading = ref(false);
 const files = ref<FileRecord[]>([]);
 
 /**
