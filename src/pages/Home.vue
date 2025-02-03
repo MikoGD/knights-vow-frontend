@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import Button from '@/components/Button.vue';
 import SearchInput from '@/components/SearchInput.vue';
+import ComponentLoader from '@/components/loader/ComponentLoader.vue';
 import { useRequests } from '@/composables';
 import { Icon } from '@iconify/vue';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,6 +24,7 @@ const { get, uploadFile: uploadFileSocket, downloadFile: downloadFileSocket } = 
 const fileToUpload = ref<File | null>(null);
 const inputFileRef = useTemplateRef<HTMLInputElement>('input-file-ref');
 const searchModel = ref('');
+const isLoading = ref(true);
 
 // const isLoading = ref(false);
 const files = ref<FileRecord[]>([]);
@@ -60,6 +62,7 @@ function handleUploadFile() {
  * Handles searching for files with name entered. Sends a request to the server.
  */
 async function handleSearchInput() {
+  isLoading.value = true;
   let responseData: GetUploadsResponse;
 
   if (searchModel.value === '') {
@@ -69,61 +72,66 @@ async function handleSearchInput() {
   }
 
   files.value = responseData.files;
+  isLoading.value = false;
 }
 
 onMounted(async () => {
   const responseData = await get<GetUploadsResponse>('/files');
   files.value = responseData.files;
+  isLoading.value = false;
 });
 </script>
 <template>
   <section class="home">
-    <div class="header">
+    <div class="file-search">
       <input
         ref="input-file-ref"
         type="file"
-        class="header__upload-input"
+        class="file-search__upload-input"
         @change="handleFileAdded"
       />
       <SearchInput
         id="files-search-input"
         v-model="searchModel"
-        class="header__search-input"
+        class="file-search__search-input"
         placeholder="Search..."
         :debounce="500"
         @input="handleSearchInput"
       />
       <Button
-        class="header__upload-btn"
+        class="file-search__upload-btn"
         type="icon"
         icon="material-symbols:upload-2-rounded"
         @click="handleUploadFile"
-        >Upload</Button
       >
+        Upload
+      </Button>
     </div>
-    <div class="file-list">
-      <div class="file-list__headers">
-        <div class="file-list__headers-cell file-name-header">Files</div>
-        <div class="file-list__headers-cell actions-header">&nbsp;</div>
-      </div>
-      <div class="file-list__body">
-        <div v-for="file of files" :key="file.id" class="file-list__row">
-          <div class="file-list__row-cell file-name-cell">
-            <span class="file-name-cell__file">{{ file.name }}</span>
-            <span class="file-name-cell__owner"
-              >{{ file.ownerUsername }} - {{ formatDistanceToNow(file.createdDate) }} ago</span
-            >
-          </div>
-          <div class="file-list__row-cell actions-cell">
-            <Icon
-              icon="material-symbols:download-2-rounded"
-              @click="() => handleDownloadFile(file)"
-            />
-            <Icon icon="material-symbols:delete-outline-rounded" />
+    <ComponentLoader :is-loading="isLoading">
+      <div class="file-list">
+        <div class="file-list__headers">
+          <div class="file-list__headers-cell file-name-header">Files</div>
+          <div class="file-list__headers-cell actions-header">&nbsp;</div>
+        </div>
+        <div v-if="!isLoading" class="file-list__body">
+          <div v-for="file of files" :key="file.id" class="file-list__row">
+            <div class="file-list__row-cell file-name-cell">
+              <span class="file-name-cell__file">{{ file.name }}</span>
+              <span class="file-name-cell__owner"
+                >{{ file.ownerUsername }} - {{ formatDistanceToNow(file.createdDate) }} ago</span
+              >
+            </div>
+            <div class="file-list__row-cell actions-cell">
+              <Icon
+                icon="material-symbols:download-2-rounded"
+                @click="() => handleDownloadFile(file)"
+              />
+              <Icon icon="material-symbols:delete-outline-rounded" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ComponentLoader>
   </section>
 </template>
 <style lang="scss" scoped>
@@ -134,7 +142,7 @@ onMounted(async () => {
   width: 100%;
 }
 
-.header {
+.file-search {
   position: sticky;
   display: flex;
   top: 0;
@@ -148,12 +156,12 @@ onMounted(async () => {
     display: none;
   }
 
-  ::v-deep &__search-input {
+  :deep(.file-search__search-input) {
     padding-right: 3rem !important;
     border-radius: 2rem !important;
   }
 
-  ::v-deep &__upload-btn {
+  :deep(.file-search__upload-btn) {
     position: absolute;
     right: 1rem;
   }
@@ -162,6 +170,7 @@ onMounted(async () => {
 .file-list {
   width: 100%;
   border-collapse: separate;
+  min-height: 70vh;
 
   &__headers {
     height: 2rem;
