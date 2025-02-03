@@ -2,16 +2,17 @@
 import Button from '@/components/Button.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import ComponentLoader from '@/components/loader/ComponentLoader.vue';
+import ActionsPanel from '@/components/ActionsPanel.vue';
 import { useRequests } from '@/composables';
 import { Icon } from '@iconify/vue';
 import { formatDistanceToNow } from 'date-fns';
 import { onMounted, ref, useTemplateRef } from 'vue';
 
 interface FileRecord {
-  id: string;
+  id: number;
   name: string;
   createdDate: string;
-  ownerID: string;
+  ownerID: number;
   ownerUsername: string;
 }
 
@@ -25,6 +26,8 @@ const fileToUpload = ref<File | null>(null);
 const inputFileRef = useTemplateRef<HTMLInputElement>('input-file-ref');
 const searchModel = ref('');
 const isLoading = ref(true);
+const selectedFile = ref<FileRecord | null>(null);
+const showActionsPanel = ref(false);
 
 // const isLoading = ref(false);
 const files = ref<FileRecord[]>([]);
@@ -33,8 +36,10 @@ const files = ref<FileRecord[]>([]);
  * Handles downloading a file
  * @param file File to download
  */
-async function handleDownloadFile(file: FileRecord) {
-  await downloadFileSocket(Number(file.id));
+async function handleDownloadFile() {
+  if (!selectedFile.value) return;
+
+  await downloadFileSocket(Number(selectedFile.value.id));
 }
 
 /**
@@ -73,6 +78,15 @@ async function handleSearchInput() {
 
   files.value = responseData.files;
   isLoading.value = false;
+}
+
+/**
+ *
+ * @param file
+ */
+function onMoreOptionsClick(file: FileRecord) {
+  selectedFile.value = file;
+  showActionsPanel.value = true;
 }
 
 onMounted(async () => {
@@ -122,20 +136,39 @@ onMounted(async () => {
               >
             </div>
             <div class="file-list__row-cell actions-cell">
-              <Icon
-                icon="material-symbols:download-2-rounded"
-                @click="() => handleDownloadFile(file)"
-              />
-              <Icon icon="material-symbols:delete-outline-rounded" />
+              <Icon icon="material-symbols:more-vert" @click="() => onMoreOptionsClick(file)" />
             </div>
           </div>
         </div>
       </div>
     </ComponentLoader>
   </section>
+  <ActionsPanel
+    header="File actions"
+    :show="showActionsPanel"
+    :actions="[
+      {
+        label: 'Download',
+        icon: 'material-symbols:download',
+        onClick: handleDownloadFile,
+      },
+      {
+        label: 'Delete',
+        icon: 'material-symbols:delete',
+        onClick: () => console.log('Delete'),
+      },
+    ]"
+    @close="
+      () => {
+        showActionsPanel = false;
+        selectedFile = null;
+      }
+    "
+  />
 </template>
 <style lang="scss" scoped>
 @use '@/styles/variables/colors';
+@use '@/styles/utils';
 
 .home {
   height: 100%;
@@ -194,8 +227,9 @@ onMounted(async () => {
   }
 
   &__body {
-    display: flex;
-    flex-direction: column;
+    @include utils.column;
+    overflow-y: auto;
+    max-height: 75vh;
   }
 
   &__row {
@@ -236,7 +270,7 @@ onMounted(async () => {
         flex-basis: 15%;
         text-align: right;
         display: flex;
-        justify-content: space-between;
+        justify-content: end;
         align-items: center;
         padding-top: 0.2rem;
       }
