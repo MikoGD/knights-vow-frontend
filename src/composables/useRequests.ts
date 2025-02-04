@@ -3,7 +3,8 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { useWebSockets } from './useWebSockets';
 
 const CHUNK_SIZE = 1024 * 1024;
-const API_BASE_URL = 'http://191.168.68.100:8080';
+// const API_BASE_URL = 'http://191.168.68.100:8080';
+const API_BASE_URL = 'http://localhost:8080';
 const API_VERSION = 'v1';
 const API_URL = `${API_BASE_URL}/api/${API_VERSION}`;
 
@@ -50,6 +51,15 @@ function useRequests() {
   ): Promise<T> {
     const response = await instance.post(url, data, options);
     return response.data as T;
+  }
+
+  /**
+   * Send a DELETE request to the backend
+   * @param url URL to make a DELETE request to
+   * @param options Axios config options to pass to the DELETE request
+   */
+  async function deleteRequest(url: string, options?: AxiosRequestConfig): Promise<void> {
+    await instance.delete(url, options);
   }
 
   /**
@@ -112,8 +122,6 @@ function useRequests() {
           chunkNumber++;
         };
       }
-
-      resolve();
     });
   }
 
@@ -183,6 +191,7 @@ function useRequests() {
   return {
     get,
     post,
+    deleteRequest,
     uploadFile,
     downloadFile,
   };

@@ -3,6 +3,7 @@ import Button from '@/components/Button.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import ComponentLoader from '@/components/loader/ComponentLoader.vue';
 import ActionsPanel from '@/components/ActionsPanel.vue';
+import Modal from '@/components/Modal.vue';
 import { useRequests } from '@/composables';
 import { Icon } from '@iconify/vue';
 import { formatDistanceToNow } from 'date-fns';
@@ -21,14 +22,39 @@ interface GetUploadsResponse {
   files: FileRecord[];
 }
 
-const { get, uploadFile: uploadFileSocket, downloadFile: downloadFileSocket } = useRequests();
-const fileToUpload = ref<File | null>(null);
+const { get, deleteRequest, uploadFile, downloadFile } = useRequests();
 const inputFileRef = useTemplateRef<HTMLInputElement>('input-file-ref');
 const searchModel = ref('');
 const isLoading = ref(true);
+const isDeleteLoading = ref(false);
 const selectedFile = ref<FileRecord | null>(null);
 const showActionsPanel = ref(false);
 const files = ref<FileRecord[]>([]);
+const modalOptions = ref({
+  show: false,
+  header: '',
+  body: '',
+});
+
+/**
+ *
+ * @param fileName
+ */
+async function getFiles(fileName?: string) {
+  isLoading.value = true;
+  let responseData: GetUploadsResponse;
+  try {
+    if (!fileName || fileName === '') {
+      responseData = await get<GetUploadsResponse>('/files');
+    } else {
+      responseData = await get<GetUploadsResponse>(`/files?fileName=${fileName}`);
+    }
+  } finally {
+    isLoading.value = false;
+  }
+
+  return responseData.files;
+}
 
 /**
  * Handles downloading a file
@@ -37,7 +63,7 @@ const files = ref<FileRecord[]>([]);
 async function handleDownloadFile() {
   if (!selectedFile.value) return;
 
-  await downloadFileSocket(Number(selectedFile.value.id));
+  await downloadFile(Number(selectedFile.value.id));
 }
 
 /**
@@ -46,18 +72,18 @@ async function handleDownloadFile() {
  */
 async function handleFileAdded(event: Event) {
   const target = event.target as HTMLInputElement;
-  const files = target.files;
+  const inputFiles = target.files;
 
-  if (files && files.length > 0) {
-    await uploadFileSocket(files[0]);
-    fileToUpload.value = null;
+  if (inputFiles && inputFiles.length > 0) {
+    await uploadFile(inputFiles[0]);
+    files.value = await getFiles();
   }
 }
 
 /**
  * Handles opening the file explorer to add a file to input
  */
-function handleUploadFile() {
+async function handleUploadFile() {
   inputFileRef.value?.click();
 }
 
@@ -65,26 +91,60 @@ function handleUploadFile() {
  * Handles searching for files with name entered. Sends a request to the server.
  */
 async function handleSearchInput() {
-  isLoading.value = true;
-  let responseData: GetUploadsResponse;
-
-  if (searchModel.value === '') {
-    responseData = await get<GetUploadsResponse>('/files');
-  } else {
-    responseData = await get<GetUploadsResponse>(`/files?fileName=${searchModel.value}`);
-  }
-
-  files.value = responseData.files;
-  isLoading.value = false;
+  files.value = await getFiles(searchModel.value);
 }
 
 /**
  *
  * @param file
  */
-function onMoreOptionsClick(file: FileRecord) {
+function handleMoreOptionsClick(file: FileRecord) {
   selectedFile.value = file;
   showActionsPanel.value = true;
+}
+
+/**
+ *
+ */
+function handleDeleteFileClick() {
+  modalOptions.value = {
+    show: true,
+    header: 'Delete file',
+    body: 'Are you sure you want to delete this file?',
+  };
+}
+
+/**
+ *
+ */
+async function handleDeleteFile() {
+  if (!selectedFile.value) return;
+
+  isDeleteLoading.value = true;
+  await deleteRequest(`/files/${selectedFile.value.id}`);
+  isDeleteLoading.value = false;
+
+  showActionsPanel.value = false;
+  modalOptions.value = {
+    show: false,
+    header: '',
+    body: '',
+  };
+  selectedFile.value = null;
+
+  isLoading.value = true;
+  files.value = await getFiles();
+}
+
+/**
+ *
+ */
+function handleModalClose() {
+  modalOptions.value = {
+    show: false,
+    header: '',
+    body: '',
+  };
 }
 
 onMounted(async () => {
@@ -134,35 +194,50 @@ onMounted(async () => {
               >
             </div>
             <div class="file-list__row-cell actions-cell">
-              <Icon icon="material-symbols:more-vert" @click="() => onMoreOptionsClick(file)" />
+              <Icon icon="material-symbols:more-vert" @click="() => handleMoreOptionsClick(file)" />
             </div>
           </div>
         </div>
       </div>
     </ComponentLoader>
   </section>
-  <ActionsPanel
-    header="File actions"
-    :show="showActionsPanel"
-    :actions="[
-      {
-        label: 'Download',
-        icon: 'material-symbols:download',
-        onClick: handleDownloadFile,
-      },
-      {
-        label: 'Delete',
-        icon: 'material-symbols:delete',
-        onClick: () => console.log('Delete'),
-      },
-    ]"
-    @close="
-      () => {
-        showActionsPanel = false;
-        selectedFile = null;
-      }
-    "
-  />
+  <Teleport to="#app">
+    <ActionsPanel
+      header="File actions"
+      :show="showActionsPanel"
+      :actions="[
+        {
+          label: 'Download',
+          icon: 'material-symbols:download',
+          onClick: handleDownloadFile,
+        },
+        {
+          label: 'Delete',
+          icon: 'material-symbols:delete',
+          onClick: handleDeleteFileClick,
+        },
+      ]"
+      @close="
+        () => {
+          showActionsPanel = false;
+          selectedFile = null;
+        }
+      "
+    />
+    <Modal
+      confirm
+      center-modal-content
+      :show="modalOptions.show"
+      :header="modalOptions.header"
+      :is-confirm-loading="isDeleteLoading"
+      @confirm="handleDeleteFile"
+      @close="handleModalClose"
+    >
+      <p>
+        {{ modalOptions.body }}
+      </p>
+    </Modal>
+  </Teleport>
 </template>
 <style lang="scss" scoped>
 @use '@/styles/variables/colors';
