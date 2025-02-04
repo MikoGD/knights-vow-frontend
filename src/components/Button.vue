@@ -7,6 +7,7 @@ const props = withDefaults(
     type?: 'submit' | 'button' | 'icon';
     icon?: string;
     class?: string;
+    size?: 'small';
   }>(),
   {
     isLoading: false,
@@ -22,7 +23,7 @@ const emits = defineEmits<{
   <button
     v-if="props.type !== 'icon'"
     class="button"
-    :class="props.class"
+    :class="[props.class, props.size && `button--${props.size}`]"
     :type="props.type"
     :disabled="props.disabled || props.isLoading"
     @click="emits('click', $event)"
@@ -34,7 +35,7 @@ const emits = defineEmits<{
     v-if="props.type === 'icon' && props.icon"
     class="button button--icon"
     type="button"
-    :class="props.class"
+    :class="[props.class, props.size && `button--${props.size}`]"
     :disabled="props.disabled || props.isLoading"
     @click="emits('click', $event)"
   >
@@ -71,6 +72,12 @@ const emits = defineEmits<{
     width: fit-content;
     height: fit-content;
     padding: 0;
+  }
+
+  &--small {
+    width: 6rem;
+    height: 2.5rem;
+    font-size: 0.9rem;
   }
 }
 </style>
