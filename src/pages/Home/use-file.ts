@@ -17,6 +17,12 @@ export interface GetUploadsResponse {
   files: FileRecord[];
 }
 
+interface ModalOptions {
+  show: boolean;
+  header: string | null;
+  body: string | null;
+}
+
 /**
  * Composable to encapsulate all file related functionality. Immediately fetches files when called.
  * @returns Helper functions and variables
@@ -31,7 +37,7 @@ export function useFileList() {
   const searchModel = ref('');
   const inputFileRef = useTemplateRef<HTMLInputElement>('input-file-ref');
   const showActionsPanel = ref(false);
-  const modalOptions = ref({
+  const modalOptions = reactive<ModalOptions>({
     show: false,
     header: '',
     body: '',
@@ -47,6 +53,19 @@ export function useFileList() {
       id: 'actions',
       display: '',
       class: 'file-list-header file-list-header__actions',
+    },
+  ];
+
+  const panelActions = [
+    {
+      label: 'Download',
+      icon: 'material-symbols:download',
+      onClick: downloadFile,
+    },
+    {
+      label: 'Delete',
+      icon: 'material-symbols:delete',
+      onClick: handleDeleteFileClick,
     },
   ];
 
@@ -123,7 +142,6 @@ export function useFileList() {
 
   /**
    * Handles downloading a file
-   * @param file File to download
    */
   async function downloadFile(): Promise<void> {
     if (!selectedFile.value) return;
@@ -162,18 +180,25 @@ export function useFileList() {
   }
 
   /**
-   *
+   * Handles delete file click by opening modal for delete confirmation
    */
   function handleDeleteFileClick() {
-    modalOptions.value = {
-      show: true,
-      header: 'Delete file',
-      body: 'Are you sure you want to delete this file?',
-    };
+    modalOptions.show = true;
+    modalOptions.header = 'Delete file';
+    modalOptions.body = 'Are you sure you want to delete this file?';
   }
 
   /**
-   *
+   * Closes modal
+   */
+  function closeModal() {
+    modalOptions.show = false;
+    modalOptions.header = null;
+    modalOptions.body = null;
+  }
+
+  /**
+   * Sends request to delete file and refreshes files list
    */
   async function deleteFile() {
     if (!selectedFile.value) return;
@@ -183,17 +208,21 @@ export function useFileList() {
     isLoading.deleteFile = false;
 
     showActionsPanel.value = false;
-    modalOptions.value = {
-      show: false,
-      header: '',
-      body: '',
-    };
+    closeModal();
     selectedFile.value = null;
 
     isLoading.getFiles = true;
     files.value = await getFiles();
     createList(files.value);
     isLoading.getFiles = false;
+  }
+
+  /**
+   * Closes actions panel and resets selected file
+   */
+  function closeActionsPanel() {
+    showActionsPanel.value = false;
+    selectedFile.value = null;
   }
 
   // Initialize
@@ -208,12 +237,13 @@ export function useFileList() {
     listItems,
     listHeaders,
     showActionsPanel,
-    selectedFile,
-    downloadFile,
+    modalOptions,
+    panelActions,
     handleFileAddedToInput,
     handleUploadFileClick,
-    handleDeleteFileClick,
     handleSearchInput,
     deleteFile,
+    closeModal,
+    closeActionsPanel,
   };
 }
