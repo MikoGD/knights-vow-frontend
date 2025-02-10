@@ -58,7 +58,7 @@ function useRequests() {
    * @param url URL to make a DELETE request to
    * @param options Axios config options to pass to the DELETE request
    */
-  async function deleteRequest(url: string, options?: AxiosRequestConfig): Promise<void> {
+  async function del(url: string, options?: AxiosRequestConfig): Promise<void> {
     await instance.delete(url, options);
   }
 
@@ -67,7 +67,7 @@ function useRequests() {
    * @param file File to upload
    * @returns Promise that resolves when the file is uploaded
    */
-  async function uploadFile(file: File): Promise<void> {
+  async function upload(file: File): Promise<void> {
     const store = useAuthenticationStore();
 
     if (!store.userID) {
@@ -130,7 +130,7 @@ function useRequests() {
    * @param fileID ID of the file to download
    * @returns Promise that resolves when the file is downloaded
    */
-  async function downloadFile(fileID: number): Promise<void> {
+  async function download(fileID: number): Promise<void> {
     const store = useAuthenticationStore();
 
     if (!store.userID) {
@@ -191,9 +191,9 @@ function useRequests() {
   return {
     get,
     post,
-    deleteRequest,
-    uploadFile,
-    downloadFile,
+    del,
+    upload,
+    download,
   };
 }
 
