@@ -155,7 +155,7 @@ function useRequests() {
         if (event.reason === 'file sent') {
           const blob = new Blob(chunks);
 
-          // Create a download link
+          // Create a download link and download file
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
