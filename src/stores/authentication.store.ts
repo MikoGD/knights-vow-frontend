@@ -47,5 +47,11 @@ export const useAuthenticationStore = defineStore('authentication', {
 
       return response.isAuthenticated;
     },
+    logout() {
+      this.userID = null;
+      this.token = null;
+      localStorage.removeItem('userID');
+      localStorage.removeItem('token');
+    },
   },
 });
