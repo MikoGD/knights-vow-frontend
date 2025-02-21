@@ -1,8 +1,9 @@
 import { useRequests } from '@/composables/useRequests';
-import { reactive, ref, shallowRef, StyleValue, useTemplateRef } from 'vue';
+import { reactive, Ref, ref, shallowRef, StyleValue, useTemplateRef } from 'vue';
 import { Icon } from '@iconify/vue';
 import { CustomCell, ListHeader, ListItem } from '@/components/list/List.vue';
 import FileCell from './FileCell.vue';
+import { Action } from '@/components/ActionsPanel.vue';
 
 export interface FileRecord {
   id: number;
@@ -17,17 +18,13 @@ export interface GetUploadsResponse {
   files: FileRecord[];
 }
 
-interface ModalOptions {
-  show: boolean;
-  header: string | null;
-  body: string | null;
-}
-
 /**
  * Composable to encapsulate all file related functionality. Immediately fetches files when called.
  * @returns Helper functions and variables
  */
 export function useFileList() {
+  const { get, del, upload, download } = useRequests();
+
   const isLoading = reactive({
     getFiles: false,
     deleteFile: false,
@@ -37,11 +34,6 @@ export function useFileList() {
   const searchModel = ref('');
   const inputFileRef = useTemplateRef<HTMLInputElement>('input-file-ref');
   const showActionsPanel = ref(false);
-  const modalOptions = reactive<ModalOptions>({
-    show: false,
-    header: '',
-    body: '',
-  });
   const listItems = shallowRef<ListItem[][]>([]);
   const listHeaders: ListHeader[] = [
     {
@@ -55,21 +47,34 @@ export function useFileList() {
       class: 'file-list-header file-list-header__actions',
     },
   ];
+  const selectedActionConfiguration: Ref<Action[] | null> = ref(null);
+  const showDeleteModal = ref(false);
 
-  const panelActions = [
-    {
-      label: 'Download',
-      icon: 'material-symbols:download',
-      onClick: downloadFile,
-    },
-    {
-      label: 'Delete',
-      icon: 'material-symbols:delete',
-      onClick: handleDeleteFileClick,
-    },
-  ];
-
-  const { get, del, upload, download } = useRequests();
+  const panelActionConfiguration: Record<string, Action[]> = {
+    file: [
+      {
+        label: 'Download',
+        icon: 'material-symbols:download',
+        onClick: downloadFile,
+      },
+      {
+        label: 'Delete',
+        icon: 'material-symbols:delete',
+        onClick: () => {
+          showDeleteModal.value = true;
+        },
+      },
+    ],
+    upload: [
+      {
+        label: 'File',
+        icon: 'material-symbols:upload-file',
+        onClick: () => {
+          inputFileRef.value?.click();
+        },
+      },
+    ],
+  };
 
   /**
    * Handles clicking on more options icon for a file record
@@ -77,6 +82,7 @@ export function useFileList() {
    */
   function handleMoreOptionsClick(file: FileRecord): void {
     selectedFile.value = file;
+    selectedActionConfiguration.value = panelActionConfiguration.file;
     showActionsPanel.value = true;
   }
 
@@ -167,8 +173,9 @@ export function useFileList() {
   /**
    * Handles opening the file explorer to add a file to input
    */
-  async function handleUploadFileClick() {
-    inputFileRef.value?.click();
+  async function openUploadActionsPanel() {
+    selectedActionConfiguration.value = panelActionConfiguration.upload;
+    showActionsPanel.value = true;
   }
 
   /**
@@ -180,21 +187,10 @@ export function useFileList() {
   }
 
   /**
-   * Handles delete file click by opening modal for delete confirmation
-   */
-  function handleDeleteFileClick() {
-    modalOptions.show = true;
-    modalOptions.header = 'Delete file';
-    modalOptions.body = 'Are you sure you want to delete this file?';
-  }
-
-  /**
    * Closes modal
    */
   function closeModal() {
-    modalOptions.show = false;
-    modalOptions.header = null;
-    modalOptions.body = null;
+    showDeleteModal.value = false;
   }
 
   /**
@@ -223,6 +219,7 @@ export function useFileList() {
   function closeActionsPanel() {
     showActionsPanel.value = false;
     selectedFile.value = null;
+    selectedActionConfiguration.value = null;
   }
 
   // Initialize
@@ -232,18 +229,20 @@ export function useFileList() {
   })();
 
   return {
+    // Reactive variables
     searchModel,
     isLoading,
     listItems,
     listHeaders,
     showActionsPanel,
-    modalOptions,
-    panelActions,
+    showDeleteModal,
+    selectedActionConfiguration,
+    // Functions
     handleFileAddedToInput,
-    handleUploadFileClick,
+    openUploadActionsPanel,
     handleSearchInput,
     deleteFile,
-    closeModal,
     closeActionsPanel,
+    closeModal,
   };
 }

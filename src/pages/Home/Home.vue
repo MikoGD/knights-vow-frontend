@@ -2,24 +2,26 @@
 import Button from '@/components/Button.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import ActionsPanel from '@/components/ActionsPanel.vue';
-import Modal from '@/components/Modal.vue';
 import List from '@/components/list/List.vue';
 import { useFileList } from './use-file';
+import DeleteFileModal from './DeleteFileModal.vue';
 
 const {
+  // Reactive variables
   searchModel,
   isLoading,
   showActionsPanel,
-  modalOptions,
   listItems,
   listHeaders,
-  panelActions,
+  selectedActionConfiguration,
+  showDeleteModal,
+  // Functions
   handleFileAddedToInput,
-  handleUploadFileClick,
   handleSearchInput,
   deleteFile,
-  closeModal,
   closeActionsPanel,
+  openUploadActionsPanel,
+  closeModal,
 } = useFileList();
 </script>
 <template>
@@ -43,7 +45,7 @@ const {
         class="file-search__upload-btn"
         type="icon"
         icon="material-symbols:upload-2-rounded"
-        @click="handleUploadFileClick"
+        @click="openUploadActionsPanel"
       >
         Upload
       </Button>
@@ -59,22 +61,15 @@ const {
     <ActionsPanel
       header="File actions"
       :show="showActionsPanel"
-      :actions="panelActions"
+      :actions="selectedActionConfiguration || []"
       @close="closeActionsPanel"
     />
-    <Modal
-      confirm
-      center-modal-content
-      :show="modalOptions.show"
-      :header="modalOptions.header ?? ''"
-      :is-confirm-loading="isLoading.deleteFile"
-      @confirm="deleteFile"
+    <DeleteFileModal
+      :show="showDeleteModal"
+      :is-loading="isLoading.deleteFile"
+      @delete-file="deleteFile"
       @close="closeModal"
-    >
-      <p>
-        {{ modalOptions.body }}
-      </p>
-    </Modal>
+    />
   </Teleport>
 </template>
 <style lang="scss" scoped>
