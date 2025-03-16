@@ -51,6 +51,7 @@ const emits = defineEmits<{
   width: 100%;
   background-color: rgba(0, 0, 0, 0.2);
   justify-content: end;
+  z-index: 990;
 
   &__card {
     width: 100%;
