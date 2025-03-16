@@ -3,8 +3,9 @@ import Button from '@/components/Button.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import ActionsPanel from '@/components/ActionsPanel.vue';
 import List from '@/components/list/List.vue';
-import { useFileList } from './use-file';
+import ProgressDialog from './ProgressDialog.vue';
 import DeleteFileModal from './DeleteFileModal.vue';
+import { useFileList } from './use-file';
 
 const {
   // Reactive variables
@@ -70,6 +71,7 @@ const {
       @delete-file="deleteFile"
       @close="closeModal"
     />
+    <ProgressDialog />
   </Teleport>
 </template>
 <style lang="scss" scoped>

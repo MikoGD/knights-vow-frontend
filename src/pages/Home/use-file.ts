@@ -162,6 +162,7 @@ export function useFileList() {
   async function handleFileAddedToInput(event: Event) {
     const target = event.target as HTMLInputElement;
     const inputFiles = target.files;
+    closeActionsPanel();
 
     if (inputFiles && inputFiles.length > 0) {
       await upload(inputFiles[0]);

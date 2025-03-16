@@ -1,6 +1,8 @@
 import { useAuthenticationStore } from '@/stores/authentication.store';
 import axios, { AxiosRequestConfig } from 'axios';
 import { useWebSockets } from './useWebSockets';
+import { useEvents } from './useEvents';
+import type { UploadProgressEvent } from '@/pages/Home/ProgressDialog.vue';
 
 const CHUNK_SIZE = 1024 * 1024;
 // const API_BASE_URL = 'http://191.168.68.100:8080';
@@ -69,6 +71,7 @@ function useRequests() {
    */
   async function upload(file: File): Promise<void> {
     const store = useAuthenticationStore();
+    const { publish } = useEvents();
 
     if (!store.userID) {
       throw new Error('User ID not found');
@@ -76,53 +79,76 @@ function useRequests() {
 
     const { connect } = useWebSockets(`${API_URL}/files/upload?token=${store.token}`);
     const socket = await connect();
-    return new Promise<void>((resolve, reject) => {
-      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    /**
+     * This will contain the resolve value which will be called in event listerner 'message' when
+     * the backend has sent an acknowledgement that the chunk has been received and can send the
+     * next one
+     */
+    let chunkResolve: ((value?: unknown) => void) | null = null;
+    let uploadResolve: (value?: void | PromiseLike<void>) => void;
+    let uploadReject: (reason?: unknown) => void;
 
-      socket.addEventListener('error', () => {
-        reject(new Error('Socket error'));
-      });
-
-      socket.addEventListener('close', (event: CloseEvent) => {
-        console.log('Socket closed', event.reason, event.code);
-        if (event.code !== 1000) {
-          reject(new Error(`Socket closed unexpectedly: ${event.reason}`));
-        }
-
-        resolve();
-      });
-
-      socket.addEventListener('message', (event: MessageEvent) => {
-        console.log('Message received', event.data);
-      });
-
-      socket.send(
-        JSON.stringify({
-          totalChunks,
-          fileName: file.name,
-          userID: store.userID,
-        }),
-      );
-
-      let chunkNumber = 0;
-      for (let i = 1; i <= totalChunks; i++) {
-        const start = chunkNumber * CHUNK_SIZE;
-        const end = Math.min((chunkNumber + 1) * CHUNK_SIZE, file.size);
-        const chunk = file.slice(start, end);
-
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(chunk);
-
-        reader.onload = () => {
-          const arrayBuffer = reader.result;
-          const uint8Array = new Uint8Array(arrayBuffer as ArrayBuffer);
-
-          socket.send(uint8Array);
-
-          chunkNumber++;
-        };
-      }
+    const uploadPromise: Promise<void> = new Promise((res, rej) => {
+      uploadResolve = res;
+      uploadReject = rej;
     });
+
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+    socket.addEventListener('error', () => {
+      uploadReject(new Error('Socket error'));
+    });
+
+    socket.addEventListener('close', (event: CloseEvent) => {
+      console.log('Socket closed', event.reason, event.code);
+      if (event.code !== 1000) {
+        uploadReject(new Error(`Socket closed unexpectedly: ${event.reason}`));
+      }
+
+      uploadResolve();
+    });
+
+    socket.addEventListener('message', (event: MessageEvent) => {
+      const eventData = JSON.parse(event.data);
+      publish('file-upload-progress', {
+        fileName: file.name,
+        uploadPercentage: eventData.uploadPercentage,
+      } as Omit<UploadProgressEvent, 'progressBarElemID'>);
+
+      if (chunkResolve) chunkResolve();
+    });
+
+    socket.send(
+      JSON.stringify({
+        totalChunks,
+        fileName: file.name,
+        userID: store.userID,
+      }),
+    );
+
+    let chunkNumber = 0;
+    for (let i = 1; i <= totalChunks; i++) {
+      const start = chunkNumber * CHUNK_SIZE;
+      const end = Math.min((chunkNumber + 1) * CHUNK_SIZE, file.size);
+      const chunk = file.slice(start, end);
+
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(chunk);
+
+      reader.onload = () => {
+        const arrayBuffer = reader.result;
+        const uint8Array = new Uint8Array(arrayBuffer as ArrayBuffer);
+
+        socket.send(uint8Array);
+
+        chunkNumber++;
+      };
+
+      await new Promise((res) => {
+        chunkResolve = res;
+      });
+    }
+    return uploadPromise;
   }
 
   /**
