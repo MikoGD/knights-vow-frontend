@@ -52,9 +52,9 @@ const emits = defineEmits<{
   height: 3rem;
   font-size: 1rem;
   color: colors.$text-primary;
-  background-color: #bfbfbf;
+  background-color: colors.$white;
   padding: 0.5rem 1rem;
-  border: none;
+  border: 1px solid colors.$black;
   border-radius: 0.3125rem;
   display: flex;
   justify-content: center;
@@ -70,6 +70,7 @@ const emits = defineEmits<{
 
   &--icon {
     background: transparent;
+    border: none;
     width: fit-content;
     height: fit-content;
     padding: 0;
