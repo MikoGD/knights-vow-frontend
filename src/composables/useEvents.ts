@@ -3,8 +3,8 @@
  * user-login - when a user logs in
  * user-logout - when a user logs out
  */
-type Event = 'user-login' | 'user-logout';
-type EventData = Record<string, unknown>;
+type Event = 'user-login' | 'user-logout' | 'file-upload-progress';
+export type EventData = Record<string, unknown>;
 type SubscriberCallback<T extends EventData> = (data?: T) => Promise<void> | void;
 type Subscribers<T extends EventData> = Map<number, SubscriberCallback<T>>;
 
