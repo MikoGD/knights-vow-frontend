@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 import { ref, computed } from 'vue';
 import { jwtDecode } from 'jwt-decode';
 import Input, { FieldClasses } from '@/components/form/Input.vue';
-import Button from '@/components/Button.vue';
+import Button from '@/components/Button/Button.vue';
 import { useRequests, addAuthorizationHeader } from '@/composables/useRequests';
 import { useEvents } from '@/composables/useEvents';
 import { useAuthenticationStore } from '@/stores/authentication.store';

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Button from '@/components/Button.vue';
+import Button from '@/components/Button/Button.vue';
 
 const props = withDefaults(
   defineProps<{
