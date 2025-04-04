@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue';
+import { toRefs, watch } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -12,9 +13,16 @@ const props = withDefaults(
   }>(),
   {
     isLoading: false,
-    type: 'submit',
+    type: 'button',
   },
 );
+
+const { type, icon } = toRefs(props);
+
+watch([type, icon], ([newType, newIcon]) => {
+  if (newType === 'icon' && !!newIcon === false)
+    throw new Error('Button type is icon but icon is not set');
+});
 
 const emits = defineEmits<{
   click: [MouseEvent];
