@@ -238,6 +238,7 @@ export function useFileList() {
     showActionsPanel,
     showDeleteModal,
     selectedActionConfiguration,
+    selectedFile,
     // Functions
     handleFileAddedToInput,
     openUploadActionsPanel,

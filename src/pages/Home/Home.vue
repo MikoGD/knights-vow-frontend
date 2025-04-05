@@ -16,6 +16,7 @@ const {
   listHeaders,
   selectedActionConfiguration,
   showDeleteModal,
+  selectedFile,
   // Functions
   handleFileAddedToInput,
   handleSearchInput,
@@ -61,6 +62,7 @@ const {
   <Teleport to="#app">
     <ActionsPanel
       header="File actions"
+      :file-name="selectedFile?.name"
       :show="showActionsPanel"
       :actions="selectedActionConfiguration || []"
       @close="closeActionsPanel"
