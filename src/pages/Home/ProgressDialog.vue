@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Button from '@/components/Button.vue';
+import Button from '@/components/Button/Button.vue';
 import { onBeforeUnmount, reactive, nextTick } from 'vue';
 import { EventData, useEvents } from '@/composables/useEvents';
 

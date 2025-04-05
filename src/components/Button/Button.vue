@@ -1,27 +1,18 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue';
-import { toRefs, watch } from 'vue';
 
-const props = withDefaults(
-  defineProps<{
-    isLoading?: boolean;
-    disabled?: boolean;
-    type?: 'submit' | 'button' | 'icon';
-    icon?: string;
-    class?: string;
-    size?: 'small';
-  }>(),
-  {
-    isLoading: false,
-    type: 'button',
-  },
-);
+export interface ButtonProps {
+  isLoading?: boolean;
+  disabled?: boolean;
+  type?: 'submit' | 'button' | 'icon';
+  icon?: string;
+  class?: string;
+  size?: 'small';
+}
 
-const { type, icon } = toRefs(props);
-
-watch([type, icon], ([newType, newIcon]) => {
-  if (newType === 'icon' && !!newIcon === false)
-    throw new Error('Button type is icon but icon is not set');
+const props = withDefaults(defineProps<ButtonProps>(), {
+  isLoading: false,
+  type: 'button',
 });
 
 const emits = defineEmits<{

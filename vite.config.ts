@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
@@ -11,5 +12,14 @@ export default defineConfig({
         replacement: '/src',
       },
     ],
+  },
+  server: {
+    proxy: {
+      '/api': 'http://192.168.68.104:8080',
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.spec.ts'],
   },
 });

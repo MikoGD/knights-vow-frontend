@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Button from '@/components/Button.vue';
+import Button from '@/components/Button/Button.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import ActionsPanel from '@/components/ActionsPanel.vue';
 import List from '@/components/list/List.vue';
