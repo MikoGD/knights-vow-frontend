@@ -9,23 +9,7 @@ export interface UploadProgressEvent extends EventData {
   progressBarElemID: string;
 }
 
-const files: UploadProgressEvent[] = reactive([
-  {
-    fileName: 'test-file-1.txt',
-    uploadPercentage: 42,
-    progressBarElemID: 'test-file-1',
-  },
-  {
-    fileName: 'test-file-2.txt',
-    uploadPercentage: 69,
-    progressBarElemID: 'test-file-2',
-  },
-  {
-    fileName: 'test-file-3.txt',
-    uploadPercentage: 100,
-    progressBarElemID: 'test-file-3',
-  },
-]);
+const files: UploadProgressEvent[] = reactive([]);
 
 const { subscribe, unsubscribe } = useEvents();
 
