@@ -11,6 +11,7 @@ const props = defineProps<{
   header: string;
   actions: Action[];
   show: boolean;
+  fileName?: string;
 }>();
 
 const emits = defineEmits<{
@@ -22,6 +23,7 @@ const emits = defineEmits<{
     <div class="actions-panel__card" @click.stop>
       <div class="actions-panel__card-header">
         <h3>{{ props.header }}</h3>
+        <h4>{{ props.fileName }}</h4>
       </div>
       <div class="actions-panel__actions">
         <div
@@ -44,6 +46,7 @@ const emits = defineEmits<{
 
 .actions-panel {
   @include utils.column;
+
   position: fixed;
   top: 0;
   left: 0;
@@ -68,6 +71,12 @@ const emits = defineEmits<{
 
     & h3 {
       font-size: 1.2rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    & h4 {
+      font-size: 1rem;
       font-weight: 300;
     }
   }
