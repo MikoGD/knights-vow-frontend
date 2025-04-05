@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onBeforeMount, ref } from 'vue';
 import { Icon } from '@iconify/vue';
-import Button from '@/components/Button.vue';
+import Button from '@/components/Button/Button.vue';
 import { useEvents } from '@/composables/useEvents';
 import { useAuthenticationStore } from './stores/authentication.store';
 import { RouterView, useRouter, useRoute } from 'vue-router';
