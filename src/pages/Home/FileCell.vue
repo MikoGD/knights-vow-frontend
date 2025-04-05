@@ -13,7 +13,7 @@ const props = defineProps<FileCellProps>();
   <div class="file-cell">
     <span class="file-cell__name">{{ props.fileName }}</span>
     <span class="file-cell__meta">
-      {{ props.ownerUsername }} - {{ formatDistanceToNow(props.createdDate) }} ago
+      {{ props.ownerUsername }} - Uploaded {{ formatDistanceToNow(props.createdDate) }} ago
     </span>
   </div>
 </template>
