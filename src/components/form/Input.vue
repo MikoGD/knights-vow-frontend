@@ -7,27 +7,26 @@ export interface FieldClasses {
   errorMessage?: string;
 }
 
-const props = withDefaults(
-  defineProps<{
-    id: string;
-    label: string;
-    errorMessage?: string;
-    classes?: {
-      field?: string;
-      input?: string;
-      label?: string;
-      subLabel?: string;
-      errorMessage?: string;
-    };
-    placeholder?: string;
+export interface InputProps {
+  id: string;
+  label: string;
+  errorMessage?: string;
+  classes?: {
+    field?: string;
+    input?: string;
+    label?: string;
     subLabel?: string;
-    type?: string;
-    disabled?: boolean;
-  }>(),
-  {
-    type: 'text',
-  },
-);
+    errorMessage?: string;
+  };
+  placeholder?: string;
+  subLabel?: string;
+  type?: string;
+  disabled?: boolean;
+}
+
+const props = withDefaults(defineProps<InputProps>(), {
+  type: 'text',
+});
 const model = defineModel<string>({ required: true });
 const emits = defineEmits<{
   focus: [FocusEvent];
@@ -35,10 +34,10 @@ const emits = defineEmits<{
 }>();
 </script>
 <template>
-  <div class="login__form-username field" :class="props.classes?.field">
-    <label class="field__label" :class="props.classes?.label" :for="props.id">{{
-      props.label
-    }}</label>
+  <div class="field" :class="props.classes?.field">
+    <label class="field__label" :class="props.classes?.label" :for="props.id">
+      {{ props.label }}
+    </label>
     <input
       :id="props.id"
       v-model="model"
@@ -55,10 +54,10 @@ const emits = defineEmits<{
       class="field__sub-label field__sub-label--error"
       :class="props.classes?.errorMessage"
     >
-      Sub-label
+      {{ props.errorMessage }}
     </span>
     <span v-if="props.subLabel" class="field__sub-label" :class="props.classes?.subLabel">
-      Sub-label
+      {{ props.subLabel }}
     </span>
   </div>
 </template>
