@@ -1,14 +1,16 @@
 import { useAuthenticationStore } from '@/stores/authentication.store';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import { useWebSockets } from './useWebSockets';
 import { useEvents } from './useEvents';
 import type { UploadProgressEvent } from '@/pages/Home/ProgressDialog.vue';
 
+if (!import.meta.env.VITE_API_BASE_URL || !import.meta.env.VITE_API_VERSION) {
+  throw new Error('API base URL or API version not set');
+}
+
 const CHUNK_SIZE = 1024 * 1024;
-// const API_BASE_URL = 'http://191.168.68.100:8080';
-const API_BASE_URL = 'http://localhost:8080';
-const API_VERSION = 'v1';
-const API_URL = `${API_BASE_URL}/api/${API_VERSION}`;
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/${import.meta.env.VITE_API_VERSION}`;
 
 const instance = axios.create({
   baseURL: API_URL,
