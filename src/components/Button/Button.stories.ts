@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3';
-import Button from '@/components/Button.vue';
+import Button, { type ButtonProps } from '@/components/Button/Button.vue';
 
 const meta = {
   title: 'Button',
@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 export default meta;
 
 export const Primary: Story = {
-  render: (args) => ({
+  render: (args: ButtonProps) => ({
     components: { Button },
     setup() {
       return { args };
@@ -34,7 +34,7 @@ export const Loading: Story = {
     isLoading: true,
     class: 'example-button',
   },
-  render: (args) => ({
+  render: (args: ButtonProps) => ({
     components: {
       Button,
     },

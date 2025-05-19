@@ -10,6 +10,10 @@ export interface ButtonProps {
   size?: 'small';
 }
 
+defineSlots<{
+  default(): unknown;
+}>();
+
 const props = withDefaults(defineProps<ButtonProps>(), {
   isLoading: false,
   type: 'button',
