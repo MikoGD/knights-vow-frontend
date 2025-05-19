@@ -28,6 +28,7 @@
     "src/**/*.vue",
     "src/**/*.d.ts",
     "src/**/*.stories.ts",
+    "src/**/*.spec.ts",
     "./.storybook/*.ts",
     "./eslint.config.mjs",
     "vite.config.ts"

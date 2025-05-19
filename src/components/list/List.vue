@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { StyleValue, type Component } from 'vue';
+import type { StyleValue, Component } from 'vue';
 import ComponentLoader from '@/components/loader/ComponentLoader.vue';
 
 export interface CustomCell<T extends Record<string, unknown> = Record<string, unknown>> {
@@ -25,13 +25,15 @@ export interface ListHeader {
   class?: string;
 }
 
-const props = defineProps<{
+export interface ListProps {
   items: ListItem[][];
   headers: ListHeader[];
   /** Action icon button that is displayed at end of search */
   isLoading?: boolean;
   class?: string;
-}>();
+}
+
+const props = defineProps<ListProps>();
 
 /**
  * Check if display is a Component or string/number
@@ -48,23 +50,24 @@ function isCustomCell(display: unknown): boolean {
 </script>
 <template>
   <ComponentLoader :is-loading="props.isLoading">
-    <div class="list-list" :class="props.class">
-      <div class="list-list__headers">
+    <div class="list" :class="props.class">
+      <div class="list__headers">
         <div
           v-for="header in props.headers"
-          :key="header.display"
-          class="list-list__headers-cell list-name-header"
+          :id="header.id"
+          :key="header.id"
+          class="list__headers-cell list-name-header"
           :class="header.class"
         >
           {{ header.display }}
         </div>
       </div>
-      <div v-if="!isLoading" class="list-list__body">
-        <div v-for="row of props.items" :key="row[0].id" class="list-list__row">
+      <div v-if="!isLoading" class="list__body">
+        <div v-for="row of props.items" :key="row[0].id" class="list__row">
           <div
             v-for="cell of row"
             :key="cell.id"
-            class="list-list__row-cell"
+            class="list__row-cell"
             :class="cell.class"
             :style="cell.style"
           >
@@ -101,7 +104,7 @@ function isCustomCell(display: unknown): boolean {
   background-color: colors.$white;
 }
 
-.list-list {
+.list {
   width: 100%;
   border-collapse: separate;
   min-height: 70vh;
