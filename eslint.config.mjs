@@ -42,6 +42,18 @@ export default typescriptEslint.config(
       'jsdoc/require-returns-type': 'off',
       'vue/multi-word-component-names': 'off',
       'vue/require-default-prop': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          "args": "all",
+          "argsIgnorePattern": "^_",
+          "caughtErrors": "all",
+          "caughtErrorsIgnorePattern": "^_",
+          "destructuredArrayIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "ignoreRestSiblings": true
+        }
+      ]
     },
   },
   eslintConfigPrettier,

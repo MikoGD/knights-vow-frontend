@@ -28,8 +28,14 @@ onBeforeMount(async () => {
 
     store.userID = data.userID;
     isAuthChecked.value = true;
-    router.push('/');
+    try {
+      router.push('/');
+    } catch (e) {
+      console.error(e);
+    }
   });
+
+  await store.getAuthenicationStatus();
 });
 </script>
 

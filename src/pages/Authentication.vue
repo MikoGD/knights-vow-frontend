@@ -4,7 +4,7 @@ import { ref, computed } from 'vue';
 import { jwtDecode } from 'jwt-decode';
 import Input, { FieldClasses } from '@/components/form/Input.vue';
 import Button from '@/components/Button/Button.vue';
-import { useRequests, addAuthorizationHeader } from '@/composables/useRequests';
+import { useRequests, addAuthorizationHeader } from '@/composables/useRequestNew';
 import { useEvents } from '@/composables/useEvents';
 import { useAuthenticationStore } from '@/stores/authentication.store';
 
@@ -78,6 +78,7 @@ async function onFormSubmit(event: Event) {
     store.userID = Number(userID);
     store.token = responseData.token;
     window.localStorage.setItem('userID', userID);
+    window.localStorage.setItem('token', responseData.token);
     resetErrors();
     console.log('publishing user-login event');
     publish('user-login', { userID });
@@ -111,6 +112,7 @@ const authenticaitonLabel = computed<string>(() => {
       <Input
         id="username"
         v-model="userInputValue"
+        autocomplete="username"
         label="Username"
         placeholder="Enter username"
         type="text"
@@ -120,6 +122,7 @@ const authenticaitonLabel = computed<string>(() => {
       <Input
         id="password"
         v-model="passwordInputValue"
+        autocomplete="current-password"
         label="Password"
         placeholder="Enter password"
         type="password"

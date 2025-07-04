@@ -22,6 +22,7 @@ export interface InputProps {
   subLabel?: string;
   type?: string;
   disabled?: boolean;
+  autocomplete?: string;
 }
 
 const props = withDefaults(defineProps<InputProps>(), {
@@ -46,6 +47,7 @@ const emits = defineEmits<{
       :placeholder="props.placeholder"
       :type="props.type"
       :disabled="props.disabled"
+      :autocomplete="props.autocomplete"
       @blur="emits('blur', $event)"
       @focus="emits('focus', $event)"
     />

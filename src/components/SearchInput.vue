@@ -12,6 +12,7 @@ const props = defineProps<{
   disabled?: boolean;
   debounce?: number;
 }>();
+
 const model = defineModel<string>({ required: true });
 const emits = defineEmits<{
   focus: [FocusEvent];
